@@ -58,7 +58,6 @@ function startShopping() {
       connection.query(query, { item_id: answer.id }, function(err, res) {
         if (err) throw err;
         if (answer.quantity <= res[0].stock_quantity) {
-          console.log('Amount in inventory: ' + res[0].stock_quantity);
           var updatedItemQuantity = res[0].stock_quantity - answer.quantity;
           var query2 = 'Update products SET ? WHERE ?';
           connection.query(query2, [{ stock_quantity: updatedItemQuantity }, { item_id: answer.id }], function(err, res) {
@@ -67,7 +66,9 @@ function startShopping() {
           })
         console.log('Total cost of your purchase = $' + (res[0].price * answer.quantity));
         console.log('---------');
-        showStore();
+        console.log('Amount in inventory after purchase: ' + updatedItemQuantity);
+        console.log('---------');
+        shopAgain();
         }
         else {
           console.log("There's not enough inventory to fulfill your order. Please order again.");
@@ -75,4 +76,21 @@ function startShopping() {
         }
       });
     });
+}
+
+function shopAgain() {
+  inquirer
+    .prompt({
+      name: 'prompt',
+      type: 'confirm',
+      message: 'Would you like to purchase more items?',
+      default: true
+    })
+    .then(function(answer) {
+      if (answer.prompt) {
+        startShopping();
+      } else {
+        process.exit();
+      }
+    })
 }
