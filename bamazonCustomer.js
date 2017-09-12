@@ -1,11 +1,11 @@
-const mysql = require('mysql');
-const inquirer = require('inquirer');
+var mysql = require('mysql');
+var inquirer = require('inquirer');
 
 var connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
   user: 'root',
-  password: '',
+  password: 'BnR34gTR!',
   database: 'bamazon'
 });
 
@@ -15,11 +15,11 @@ connection.connect(function(err) {
 });
 
 function showStore() {
-  const query = 'SELECT item_id, product_name, price FROM products';
+  var query = 'SELECT item_id, product_name, price FROM products';
   connection.query(query, function(err, res) {
-    // console.log(res);
-    console.log("Welcome to Bamazon\n----------");
-    for (let i = 0; i < res.length; i++) {
+    console.log("\nWelcome to Bamazon\n----------");
+    for (var i = 0; i < res.length; i++) {
+      // Trying out template literals. Probably better for multi-line strings.
       console.log(`Item #: ${res[i].item_id} || Product Name: ${res[i].product_name} || Price: $${res[i].price}`);
     }
     console.log('----------');
@@ -58,14 +58,16 @@ function startShopping() {
       connection.query(query, { item_id: answer.id }, function(err, res) {
         if (err) throw err;
         if (answer.quantity <= res[0].stock_quantity) {
-        console.log('Amount in inventory: ' + res[0].stock_quantity);
+          console.log('Amount in inventory: ' + res[0].stock_quantity);
           var updatedItemQuantity = res[0].stock_quantity - answer.quantity;
           var query2 = 'Update products SET ? WHERE ?';
-          connection.query(query2, [{stock_quantity: updatedItemQuantity}, res[0]].stock_quantity, function(err, res) {
-            console.log(query);
+          connection.query(query2, [{ stock_quantity: updatedItemQuantity }, { item_id: answer.id }], function(err, res) {
+            console.log(answer.id);
+            if(err) throw err;
           })
-          console.log('Total cost of your purchase = $' + (res[0].price * answer.quantity));
-          startShopping();
+        console.log('Total cost of your purchase = $' + (res[0].price * answer.quantity));
+        console.log('---------');
+        showStore();
         }
         else {
           console.log("There's not enough inventory to fulfill your order. Please order again.");
